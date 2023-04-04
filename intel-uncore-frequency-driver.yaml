@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: intel-uncore-frequency-ocp
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: intel-uncore-frequency-ocp
+rules:
+- apiGroups:
+  - security.openshift.io
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+  resourceNames:
+  - privileged
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: intel-uncore-frequency-ocp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: intel-uncore-frequency-ocp
+subjects:
+- kind: ServiceAccount
+  name: intel-uncore-frequency-ocp
+userNames:
+- system:serviceaccount:gtp5g-demo:intel-uncore-frequency-ocp
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: intel-uncore-frequency-ocp
+spec:
+  selector:
+    matchLabels:
+      app: intel-uncore-frequency-ocp
+  template:
+    metadata:
+      labels:
+        app: intel-uncore-frequency-ocp
+    spec:
+      serviceAccount: intel-uncore-frequency-ocp
+      serviceAccountName: intel-uncore-frequency-ocp
+      containers:
+      - image: quay.io/ferossi/intel-uncore-frequency-ocp:v4.12
+        name: intel-uncore-frequency-ocp
+        imagePullPolicy: Always
+        command: ["/root/entrypoint.sh"]
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/sbin/", "rmmod", "intel-uncore-frequency"]        
+        securityContext:
+          privileged: true
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
