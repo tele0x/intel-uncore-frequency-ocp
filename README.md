@@ -40,7 +40,9 @@ kabi-rhel86
 ```
 
 Update Dockerfile with FROM quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:1291f91ad981a9cad040c9fdbef48357aff74900995925e1c3bcd32e178a0a32
+
 Update Makefile with hardcoded kernel version 4.18.0-372.32.1.el8_6.x86_64
+
 Build container
 
 ```
